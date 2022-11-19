@@ -19,7 +19,7 @@
 
 from cassandra.cluster import Cluster
 from flask import Blueprint, request, jsonify
-
+from cassandra.auth import PlainTextAuthProvider
 from const.constant import EnvConst
 
 cassandra_keyspace = Blueprint('cassandra_keyspace', __name__)
@@ -27,7 +27,8 @@ cassandra_keyspace = Blueprint('cassandra_keyspace', __name__)
 
 @cassandra_keyspace.route('', methods=['GET'])
 def get_keyspace_list():
-    cluster = Cluster([EnvConst.cassandra_host])
+    auth_provider = PlainTextAuthProvider(username=EnvConst.cassandra_username, password=EnvConst.cassandra_password)
+    cluster = Cluster([EnvConst.cassandra_host], auth_provider=auth_provider)
     session = cluster.connect()
     result_set = session.execute("""
         DESC keyspaces
@@ -41,7 +42,8 @@ def get_keyspace_list():
 @cassandra_keyspace.route('/create', methods=['POST'])
 def create_keyspace():
     request_data = request.get_json()
-    cluster = Cluster([EnvConst.cassandra_host])
+    auth_provider = PlainTextAuthProvider(username=EnvConst.cassandra_username, password=EnvConst.cassandra_password)
+    cluster = Cluster([EnvConst.cassandra_host], auth_provider)
     session = cluster.connect()
     session.execute("""
         CREATE KEYSPACE %s
@@ -53,7 +55,10 @@ def create_keyspace():
 @cassandra_keyspace.route('/delete', methods=['POST'])
 def delete_keyspace():
     request_data = request.get_json()
-    cluster = Cluster([request_data['host']])
+    username = request_data['username']
+    password = request_data['password']
+    auth_provider = PlainTextAuthProvider(username=username, password=password)
+    cluster = Cluster([request_data['host']], auth_provider)
     session = cluster.connect()
     session.execute("""
         DROP KEYSPACE %s

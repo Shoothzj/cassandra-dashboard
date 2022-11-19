@@ -20,10 +20,18 @@
 import os
 
 var_cassandra_host = os.getenv("CASSANDRA_HOST")
+var_cassandra_username = os.getenv("CASSANDRA_USERNAME")
+var_cassandra_password = os.getenv("CASSANDRA_PASSWORD")
 
 if var_cassandra_host is None:
     var_cassandra_host = "localhost"
 
+if var_cassandra_username is None:
+    var_cassandra_username = ""
 
+if var_cassandra_password is None:
+    var_cassandra_password = ""
 class EnvConst:
     cassandra_host = var_cassandra_host
+    cassandra_username = var_cassandra_username
+    cassandra_password = var_cassandra_password
